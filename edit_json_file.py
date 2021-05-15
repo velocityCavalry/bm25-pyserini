@@ -2,22 +2,23 @@ import json
 import os
 import argparse
 
-def read_and_change_json(input_file, output_file):
+def read_and_change_json(input_file, output_file, step=2):
 
     res = []
     with open(input_file, 'r+', encoding='utf-8') as f:
         for line in f:
             line = line.rstrip('\n')
             single = json.loads(line)
-            edit = {"id": single["id"], "revid": single["revid"], "url": single["url"], "title": single["title"],
-                    "contents": single["text"]}
-            res.append(edit)
+            contents = single["text"].split('\n')
+            for i in range(0, len(contents), step):
+                edit = {"id": f'{single["id"]}-{str(i)}', "revid": single["revid"], "url": single["url"], "title": single["title"],
+                    "contents": "\n".join(contents[i:min(i+step, len(contents))])}
+                res.append(edit)
 
     with open(output_file, 'w+', encoding='utf-8') as f:
         for single in res:
-            json.dump(single, f)
+            json.dump(single, f, ensure_ascii=False)
             f.write('\n')
-
 
 
 def main():
