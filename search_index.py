@@ -1,9 +1,12 @@
 from pyserini.search import SimpleSearcher
 from pyserini.index import IndexReader
+from pyserini import analysis
 import argparse
 import json
 from gzip import GzipFile
 from tqdm import tqdm
+
+# hu, da, it, fi, ru, nl, no, pt, th, tr, sv
 #
 # searcher = SimpleSearcher('indexes/jawiki-collection-jsonl')
 # index_reader = IndexReader('indexes/jawiki-collection-jsonl')
@@ -55,10 +58,6 @@ def search_indexes(searcher, query, id, answers):
     return paragraphs
 
 
-
-# {'version': xxx,'data': [{'title': xxx,
-# 'paragraphs': [{'qas': [{'question':xxx, 'id':xxx, 'answers':[{'text': xx, 'answer_start': xx}, {}, ...]}],
-# 'context': ...}, {}....]}]}
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--index-path', required=True, type=str, help='the path to the wikipedia index')
@@ -69,9 +68,65 @@ def main():
     parser.add_argument('--b', default=0.68, help='the b in bm25')
     args = parser.parse_args()
 
+    # if args.lang == 'zh':
+    #     args.lang = 'zh_cn'
+
     q2id = return_q2id_answer(args.query_path, args.lang)
     searcher = SimpleSearcher(args.index_path)
+    if args.lang == 'ar':
+        analyzer = analysis.get_lucene_analyzer(name="Arabic")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'de':
+        analyzer = analysis.get_lucene_analyzer(name="German")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'fr':
+        analyzer = analysis.get_lucene_analyzer(name="French")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'es':
+        analyzer = analysis.get_lucene_analyzer(name="Spanish")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'it':
+        analyzer = analysis.get_lucene_analyzer(name="Italian")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'ru':
+        analyzer = analysis.get_lucene_analyzer(name="Russian")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'sv':
+        analyzer = analysis.get_lucene_analyzer(name="Swedish")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'no':
+        analyzer = analysis.get_lucene_analyzer(name="Norwegian")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'nl':
+        analyzer = analysis.get_lucene_analyzer(name="Dutch")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'tr':
+        analyzer = analysis.get_lucene_analyzer(name="Turkish")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'th':
+        analyzer = analysis.get_lucene_analyzer(name="Thai")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'pt':
+        analyzer = analysis.get_lucene_analyzer(name="Portuguese")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'fi':
+        analyzer = analysis.get_lucene_analyzer(name="Finnish")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'da':
+        analyzer = analysis.get_lucene_analyzer(name="Danish")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'hu':
+        analyzer = analysis.get_lucene_analyzer(name="Hungarian")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'id':
+        analyzer = analysis.get_lucene_analyzer(name="Indonesian")
+        searcher.set_analyzer(analyzer)
+    elif args.lang == 'zh_cn' or args.lang == 'zh_tw' or args.lang == 'ja' or args.lang == 'ko':
+        analyzer = analysis.get_lucene_analyzer(name="CJK")
+        searcher.set_analyzer(analyzer)
+
     searcher.set_bm25(args.k1, args.b)
+
 
     with open(args.output, 'w+', encoding='utf-8') as fw:
         squad_formatted_content = dict()
